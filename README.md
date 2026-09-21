@@ -17,13 +17,14 @@ No prompts are sent to a cloud service. The extension only talks to `127.0.0.1`;
 
 ## Install and run the local service
 
-```bash
-cd service
+```fish
+cd /home/p4nda/Desktop/projs/Safer
 python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements-cpu.txt
-export SAFER_TOKEN="replace-with-a-long-random-secret"
-uvicorn app.main:app --host 127.0.0.1 --port 8787
+source .venv/bin/activate.fish
+python -m pip install -r service/requirements-cpu.txt
+python -m pip install -e ./cli
+set -x SAFER_TOKEN "replace-with-a-long-random-secret"
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8787 --app-dir service
 ```
 
 The first startup downloads model weights unless they are already cached. Keep the process running; it preloads models rather than repeatedly cold-loading them.
