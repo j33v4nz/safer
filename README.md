@@ -21,12 +21,14 @@ No prompts are sent to a cloud service. The extension only talks to `127.0.0.1`;
 cd service
 python3 -m venv .venv
 . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-cpu.txt
 export SAFER_TOKEN="replace-with-a-long-random-secret"
 uvicorn app.main:app --host 127.0.0.1 --port 8787
 ```
 
 The first startup downloads model weights unless they are already cached. Keep the process running; it preloads models rather than repeatedly cold-loading them.
+
+`requirements.txt` uses the normal PyTorch resolver and may install NVIDIA CUDA libraries. On a CPU-only machine, use `requirements-cpu.txt` as shown above; it selects the CPU wheel index instead.
 
 ## Load the extension
 
