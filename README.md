@@ -18,7 +18,7 @@ No prompts are sent to a cloud service. The extension only talks to `127.0.0.1`;
 ## Install and run the local service
 
 ```fish
-cd /home/p4nda/Desktop/projs/Safer
+# Run these commands from the Safer repository root.
 python3 -m venv .venv
 source .venv/bin/activate.fish
 python -m pip install -r service/requirements-cpu.txt
@@ -81,7 +81,7 @@ Interactive desktop chat composition in Cursor and other IDEs needs a native edi
 Install the included fish wrapper once:
 
 ```fish
-cd /home/p4nda/Desktop/projs/Safer
+# Run from the Safer repository root.
 source integrations/fish/install-antigravity-wrapper.fish
 ```
 
