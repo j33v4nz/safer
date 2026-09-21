@@ -1,0 +1,3 @@
+const fields = ["endpoint", "token", "failMode"];
+chrome.storage.local.get({ endpoint: "http://127.0.0.1:8787", token: "", failMode: "warn" }).then((settings) => fields.forEach((field) => document.querySelector(`#${field}`).value = settings[field]));
+document.querySelector("#save").addEventListener("click", async () => { const settings = Object.fromEntries(fields.map((field) => [field, document.querySelector(`#${field}`).value.trim()])); if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(settings.endpoint)) return document.querySelector("#status").textContent = "Use a loopback HTTP endpoint only."; await chrome.storage.local.set(settings); document.querySelector("#status").textContent = "Saved."; });

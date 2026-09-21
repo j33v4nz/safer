@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safer-cli"
+version = "1.0.0"
+description = "Local prompt firewall command line client"
+requires-python = ">=3.10"
+
+[project.scripts]
+safer = "laya_guard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["laya_guard*"]
