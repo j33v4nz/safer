@@ -16,9 +16,9 @@ from pydantic import BaseModel, Field, field_validator
 
 from .questions import GUARD_QUESTIONS, POLICY_VERSION
 
-TOKEN = os.environ.get("LAYA_GUARD_TOKEN", "")
-BLOCK_THRESHOLD = float(os.environ.get("LAYA_GUARD_BLOCK_THRESHOLD", "0.80"))
-MAX_PROMPT_CHARS = int(os.environ.get("LAYA_GUARD_MAX_PROMPT_CHARS", "12000"))
+TOKEN = os.environ.get("SAFER_TOKEN", os.environ.get("LAYA_GUARD_TOKEN", ""))
+BLOCK_THRESHOLD = float(os.environ.get("SAFER_BLOCK_THRESHOLD", os.environ.get("LAYA_GUARD_BLOCK_THRESHOLD", "0.80")))
+MAX_PROMPT_CHARS = int(os.environ.get("SAFER_MAX_PROMPT_CHARS", os.environ.get("LAYA_GUARD_MAX_PROMPT_CHARS", "12000")))
 
 
 @dataclass
@@ -33,8 +33,8 @@ runtime = Runtime()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     if not TOKEN or len(TOKEN) < 24:
-        raise RuntimeError("LAYA_GUARD_TOKEN must be set to a random secret of at least 24 characters")
-    # Preloading is intentional: Laya documents multi-second reloads when traffic changes language.
+        raise RuntimeError("SAFER_TOKEN must be set to a random secret of at least 24 characters")
+    # Preloading is intentional: changing language can otherwise trigger expensive model reloads.
     runtime.router = laya.Router(preload=True, max_loaded=2)
     runtime.loaded = True
     yield
@@ -44,7 +44,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Safer", version=POLICY_VERSION, lifespan=lifespan, docs_url=None, redoc_url=None)
 # The bearer-like local token remains the authorization boundary; CORS only enables extension fetches.
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-Laya-Guard-Token"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-Safer-Token"])
 
 
 class InspectRequest(BaseModel):
@@ -78,11 +78,11 @@ def _authorized(token: str | None) -> bool:
 
 
 def _probability(answer: dict[str, Any]) -> float:
-    """Accept Laya's documented `noul` primitive and reject malformed model output."""
+    """Accept the classifier's `noul` primitive and reject malformed model output."""
     value = answer.get("noul")
     if isinstance(value, (int, float)) and 0 <= value <= 1:
         return float(value)
-    raise ValueError("Laya returned an invalid noul probability")
+    raise ValueError("Safer classifier returned an invalid probability")
 
 
 def _predict(text: str) -> dict[str, Any]:
@@ -97,10 +97,10 @@ async def health() -> dict[str, Any]:
 
 
 @app.post("/v1/inspect", response_model=InspectResponse)
-async def inspect(payload: InspectRequest, request: Request, x_laya_guard_token: str | None = Header(default=None)) -> InspectResponse:
+async def inspect(payload: InspectRequest, request: Request, x_safer_token: str | None = Header(default=None)) -> InspectResponse:
     if request.client is None or request.client.host not in {"127.0.0.1", "::1"}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="loopback clients only")
-    if not _authorized(x_laya_guard_token):
+    if not _authorized(x_safer_token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid local guard token")
 
     started = time.perf_counter()

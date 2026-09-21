@@ -3,7 +3,7 @@
 Safer is a production-oriented, local-first prompt firewall for Chromium browsers, CLIs, and AI applications. It contains:
 
 - `extension/` — a Manifest V3 Chrome/Edge extension that intercepts paste and send actions in supported generative-AI sites.
-- `service/` — a loopback-only FastAPI companion that preloads Laya's `Router`, evaluates calibrated typed guard questions, and returns a policy decision.
+- `service/` — a loopback-only FastAPI companion that preloads the local decision router, evaluates calibrated typed guard questions, and returns a policy decision.
 - `cli/` — a command-line client for guarded prompts, stdin pipelines, and non-interactive agent commands.
 - `sdk/` — Python and TypeScript clients for adding the same policy gate to any application or agent framework.
 
@@ -12,7 +12,7 @@ No prompts are sent to a cloud service. The extension only talks to `127.0.0.1`;
 ## Prerequisites
 
 - Python 3.11+
-- A machine capable of running the selected Laya checkpoint. For multilingual production traffic, configure the Laya router with both English and multilingual checkpoints preloaded.
+- A machine capable of running the selected local checkpoint. For multilingual production traffic, configure the router with both English and multilingual checkpoints preloaded.
 - Chrome or Edge
 
 ## Install and run the local service
@@ -22,11 +22,11 @@ cd service
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-export LAYA_GUARD_TOKEN="replace-with-a-long-random-secret"
+export SAFER_TOKEN="replace-with-a-long-random-secret"
 uvicorn app.main:app --host 127.0.0.1 --port 8787
 ```
 
-The first Laya startup downloads model weights unless they are already cached. Keep the process running; it preloads models rather than repeatedly cold-loading them.
+The first startup downloads model weights unless they are already cached. Keep the process running; it preloads models rather than repeatedly cold-loading them.
 
 ## Load the extension
 
@@ -38,9 +38,9 @@ The first Laya startup downloads model weights unless they are already cached. K
 ## Deployment notes
 
 - The service is deliberately bound to `127.0.0.1`; do not expose it on a LAN without adding mTLS/authentication and a trusted reverse proxy.
-- Set `LAYA_GUARD_BLOCK_THRESHOLD` to tune policy (default `0.80`). The extension fails closed for a reachable service error and fails open only if the local service is unavailable, with a visible warning; change `failMode` in Options if your security policy requires offline fail-closed.
+- Set `SAFER_BLOCK_THRESHOLD` to tune policy (default `0.80`). The extension fails closed for a reachable service error and fails open only if the local service is unavailable, with a visible warning; change `failMode` in Options if your security policy requires offline fail-closed.
 - The content-script selectors target ChatGPT, Claude, Gemini, and generic `textarea` / `contenteditable` controls. Add site-specific adapters in `extension/content.js` before deploying to other editors.
-- Evaluate and calibrate the selected Laya checkpoints against your organization’s multilingual attack corpus before rollout. The service accepts explicit, versioned questions in `service/app/questions.py` so that policy changes are reviewed as code.
+- Evaluate and calibrate the selected checkpoints against your organization’s multilingual attack corpus before rollout. The service accepts explicit, versioned questions in `service/app/questions.py` so that policy changes are reviewed as code.
 
 ## Verify
 
@@ -52,7 +52,7 @@ python -m compileall app
 
 ## CLI and SDK integrations
 
-Set `LAYA_GUARD_TOKEN` in your shell, then install the CLI with `pip install -e ./cli`.
+Set `SAFER_TOKEN` in your shell, then install the CLI with `pip install -e ./cli`.
 
 ```bash
 # Inspect a prompt without sending it to an LLM.

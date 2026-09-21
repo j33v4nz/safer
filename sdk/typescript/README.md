@@ -1,7 +1,7 @@
 # TypeScript SDK
 
 ```js
-import { requireAllowed } from "@laya/guardrail";
+import { requireAllowed } from "@safer/guardrail";
 
 await requireAllowed(userPrompt, { source: "my-agent" });
 const response = await provider.responses.create({ input: userPrompt });

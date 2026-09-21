@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     try {
       const response = await fetch(`${config.endpoint.replace(/\/$/, "")}/v1/inspect`, {
         method: "POST", signal: controller.signal,
-        headers: { "Content-Type": "application/json", "X-Laya-Guard-Token": config.token },
+        headers: { "Content-Type": "application/json", "X-Safer-Token": config.token },
         body: JSON.stringify({ text: message.text, source: message.source || location.hostname })
       });
       if (!response.ok) throw new Error(`service responded ${response.status}`);

@@ -1,4 +1,4 @@
-"""Versioned, auditable policy questions evaluated in one Laya forward pass."""
+"""Versioned, auditable policy questions evaluated in one local forward pass."""
 
 POLICY_VERSION = "2026-09-guardrail-v1"
 

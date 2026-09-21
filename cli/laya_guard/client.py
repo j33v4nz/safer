@@ -18,11 +18,11 @@ class Decision:
 
 
 def inspect(text: str, *, endpoint: str | None = None, token: str | None = None, source: str = "cli", timeout: float = 9) -> Decision:
-    endpoint = (endpoint or os.environ.get("LAYA_GUARD_ENDPOINT", "http://127.0.0.1:8787")).rstrip("/")
-    token = token or os.environ.get("LAYA_GUARD_TOKEN")
+    endpoint = (endpoint or os.environ.get("SAFER_ENDPOINT", "http://127.0.0.1:8787")).rstrip("/")
+    token = token or os.environ.get("SAFER_TOKEN")
     if not token:
-        raise RuntimeError("LAYA_GUARD_TOKEN is required")
-    request = Request(f"{endpoint}/v1/inspect", data=json.dumps({"text": text, "source": source}).encode(), headers={"Content-Type": "application/json", "X-Laya-Guard-Token": token}, method="POST")
+        raise RuntimeError("SAFER_TOKEN is required")
+    request = Request(f"{endpoint}/v1/inspect", data=json.dumps({"text": text, "source": source}).encode(), headers={"Content-Type": "application/json", "X-Safer-Token": token}, method="POST")
     try:
         with urlopen(request, timeout=timeout) as response:
             payload = json.loads(response.read())

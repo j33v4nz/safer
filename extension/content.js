@@ -5,7 +5,7 @@ let checking = false;
 
 function editable(target) { return target && target.closest(editableSelectors.join(",")); }
 function textOf(node) { return node instanceof HTMLTextAreaElement ? node.value : (node?.innerText || "").trim(); }
-function notice(message, kind = "info") { let el = document.querySelector("#laya-guardrail-notice"); if (!el) { el = document.createElement("div"); el.id = "laya-guardrail-notice"; document.body.append(el); } el.className = kind; el.textContent = message; setTimeout(() => el?.remove(), 5000); }
+function notice(message, kind = "info") { let el = document.querySelector("#safer-notice"); if (!el) { el = document.createElement("div"); el.id = "safer-notice"; document.body.append(el); } el.className = kind; el.textContent = message; setTimeout(() => el?.remove(), 5000); }
 function inspect(text) { return chrome.runtime.sendMessage({ type: "inspect", text, source: location.hostname }); }
 
 async function authorize(node, retry) {
@@ -13,9 +13,9 @@ async function authorize(node, retry) {
   if (!text || checking) return true;
   checking = true; notice("Safer is checking this prompt…");
   const result = await inspect(text); checking = false;
-  if (result.status === "ok" && result.decision === "allow") { document.querySelector("#laya-guardrail-notice")?.remove(); bypassOnce = true; retry(); return true; }
+  if (result.status === "ok" && result.decision === "allow") { document.querySelector("#safer-notice")?.remove(); bypassOnce = true; retry(); return true; }
   if (result.status === "ok") { notice(`Blocked locally: ${Math.round(Math.max(...Object.values(result.scores).map(s => s.probability)) * 100)}% policy risk.`, "block"); return false; }
-  if (result.status === "unavailable" && result.failMode === "block") { notice("Blocked: local Laya service is unavailable.", "block"); return false; }
+  if (result.status === "unavailable" && result.failMode === "block") { notice("Blocked: local Safer service is unavailable.", "block"); return false; }
   notice(result.status === "unconfigured" ? "Safer needs setup in extension Options." : "Local guardrail unavailable — warning only.", "warn"); bypassOnce = true; retry(); return true;
 }
 
